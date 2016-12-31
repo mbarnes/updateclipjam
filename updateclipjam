@@ -1,0 +1,49 @@
+#!/bin/bash
+#
+# This script synchronizes a Sansa Clip Jam device by generating Ogg Vorbis
+# (.ogg) files from local FLAC files and moving them to the device so as to
+# preserve the directory layout of the FLAC files.
+#
+# (c) Copyright 2016 Matthew Barnes <mbarnes@redhat.com>
+#
+
+set -euo pipefail
+
+export DEVICEPATH="/media/$USER/CLIP JAM"
+
+function flac2vorbis {
+  SRCDIR=`dirname "$1"`
+  DSTDIR=$2
+  FLACNAME=`basename "$1"`
+  VORBISNAME=`echo ${FLACNAME/%flac/ogg} | sed -e "s|\?||g" -e "s|:| -|g"`
+  if [ ! -e "$DSTDIR/$VORBISNAME" ]
+  then
+    ffmpeg -nostats -loglevel quiet -i "$SRCDIR/$FLACNAME" \
+           -qscale:a 0 "$SRCDIR/$VORBISNAME"
+    mv "$SRCDIR/$VORBISNAME" "$DSTDIR"
+    echo "$DSTDIR/$VORBISNAME"
+  fi
+}
+
+function copyflac {
+  SRCDIR=$1
+  DSTDIR=`echo "$SRCDIR" | sed -e "s|$HOME|$DEVICEPATH|" -e "s|:| -|g"`
+  export DSTDIR
+  mkdir --parents "$DSTDIR"
+  find "$SRCDIR" -name "*.flac" -maxdepth 1 -print0 | \
+    xargs --null --max-procs 0 --max-args 1 --replace bash -c 'flac2vorbis "{}" "$DSTDIR"'
+}
+
+export -f flac2vorbis
+export -f copyflac
+
+if [ ! -d "$DEVICEPATH" ]
+then
+  >&2 echo "Sansa Clip Jam device not mounted."
+  exit 1
+fi
+
+find $HOME/Music -name "*.flac" -print0 | \
+  xargs --null dirname --zero | \
+  uniq --zero-terminated | \
+  xargs --null --replace bash -c 'copyflac "{}"'
