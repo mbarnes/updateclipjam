@@ -9,7 +9,7 @@
 
 set -euo pipefail
 
-export DEVICEPATH="/media/$USER/CLIP JAM"
+export DEVICEPATH="/media/$USER/MUSIC"
 
 function flac2vorbis {
   SRCDIR=`dirname "$1"`
