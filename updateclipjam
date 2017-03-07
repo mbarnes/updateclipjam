@@ -4,7 +4,7 @@
 # (.ogg) files from local FLAC files and moving them to the device so as to
 # preserve the directory layout of the FLAC files.
 #
-# (c) Copyright 2016 Matthew Barnes <mbarnes@redhat.com>
+# (c) Copyright 2017 Matthew Barnes <mbarnes@redhat.com>
 #
 
 set -euo pipefail
