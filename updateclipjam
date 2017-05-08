@@ -19,7 +19,7 @@ function flac2vorbis {
   if [ ! -e "$DSTDIR/$VORBISNAME" ]
   then
     ffmpeg -nostats -loglevel quiet -i "$SRCDIR/$FLACNAME" \
-           -qscale:a 0 "$SRCDIR/$VORBISNAME"
+           -qscale:a 0 -map 0:a "$SRCDIR/$VORBISNAME"
     mv "$SRCDIR/$VORBISNAME" "$DSTDIR"
     echo "$DSTDIR/$VORBISNAME"
   fi
