@@ -43,7 +43,13 @@ then
   exit 1
 fi
 
-find $HOME/Music -name "*.flac" -print0 | \
+STARTDIR="$HOME/Music"
+if [[ `pwd` == "$STARTDIR"* ]]
+then
+  STARTDIR=`pwd`
+fi
+
+find "$STARTDIR" -name "*.flac" -print0 | \
   xargs --null dirname --zero | \
   uniq --zero-terminated | \
   xargs --null --replace bash -c 'copyflac "{}"'
