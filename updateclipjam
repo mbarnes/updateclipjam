@@ -27,7 +27,7 @@ function flac2vorbis {
 
 function copyflac {
   SRCDIR=$1
-  DSTDIR=`echo "$SRCDIR" | sed -e "s|$HOME|$DEVICEPATH|" -e "s|:| -|g"`
+  DSTDIR=`echo "$SRCDIR" | sed -e "s|$HOME|$DEVICEPATH|" -e "s|:| -|g" -e "s|\*||g"`
   export DSTDIR
   mkdir --parents "$DSTDIR"
   find "$SRCDIR" -name "*.flac" -maxdepth 1 -print0 | \
