@@ -4,7 +4,7 @@
 # (.ogg) files from local FLAC files and moving them to the device so as to
 # preserve the directory layout of the FLAC files.
 #
-# (c) Copyright 2017 Matthew Barnes <mbarnes@redhat.com>
+# (c) Copyright 2019 Matthew Barnes <mbarnes@redhat.com>
 #
 
 set -euo pipefail
@@ -36,7 +36,7 @@ function copyflac {
 }
 
 function check_library_size {
-  SIZE=$(find "$DEVICEPATH" -name "*.ogg" -o -name "*.mp3" | wc --lines)
+  SIZE=$(find "$DEVICEPATH/Music" -type f | wc --lines)
   if (( SIZE > LIBRARYMAX ))
   then
     echo "WARNING: Library size exceeds maximum by $(( SIZE - LIBRARYMAX )) files" > /dev/stderr
