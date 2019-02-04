@@ -10,6 +10,7 @@
 set -euo pipefail
 
 export DEVICEPATH="/media/$USER/MUSIC"
+export LIBRARYMAX=2000
 
 function flac2vorbis {
   SRCDIR=$(dirname "$1")
@@ -34,6 +35,14 @@ function copyflac {
     xargs --null --max-procs 0 --max-args 1 --replace bash -c 'flac2vorbis "{}" "$DSTDIR"'
 }
 
+function check_library_size {
+  SIZE=$(find "$DEVICEPATH" -name "*.ogg" -o -name "*.mp3" | wc --lines)
+  if (( SIZE > LIBRARYMAX ))
+  then
+    echo "WARNING: Library size exceeds maximum by $(( SIZE - LIBRARYMAX )) files" > /dev/stderr
+  fi
+}
+
 export -f flac2vorbis
 export -f copyflac
 
@@ -53,3 +62,5 @@ find "$STARTDIR" -name "*.flac" -print0 | \
   xargs --null dirname --zero | \
   uniq --zero-terminated | \
   xargs --null --replace bash -c 'copyflac "{}"'
+
+check_library_size
