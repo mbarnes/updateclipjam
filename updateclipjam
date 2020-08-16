@@ -4,44 +4,14 @@
 # (.ogg) files from local FLAC files and moving them to the device so as to
 # preserve the directory layout of the FLAC files.
 #
-# (c) Copyright 2019 Matthew Barnes <mbarnes@redhat.com>
+# (c) Copyright 2020 Matthew Barnes <mbarnes@redhat.com>
 #
 
 set -euo pipefail
 
+source $(dirname $(realpath $(which $0)))/functions
+
 export DEVICEPATH="/media/$USER/MUSIC"
-export LIBRARYMAX=2000
-
-function flac2vorbis {
-  SRCDIR=$(dirname "$1")
-  DSTDIR=$2
-  FLACNAME=$(basename "$1")
-  VORBISNAME=$(echo ${FLACNAME/%flac/ogg} | sed -e "s|\?||g" -e "s|:| -|g")
-  if [ ! -e "$DSTDIR/$VORBISNAME" ]
-  then
-    ffmpeg -nostats -loglevel quiet -i "$SRCDIR/$FLACNAME" \
-           -qscale:a 0 -map 0:a "$SRCDIR/$VORBISNAME"
-    mv "$SRCDIR/$VORBISNAME" "$DSTDIR"
-    echo "$DSTDIR/$VORBISNAME"
-  fi
-}
-
-function copyflac {
-  SRCDIR=$1
-  DSTDIR=$(echo "$SRCDIR" | sed -e "s|$HOME|$DEVICEPATH|" -e "s|:| -|g" -e "s|\*||g")
-  export DSTDIR
-  mkdir --parents "$DSTDIR"
-  find "$SRCDIR" -name "*.flac" -maxdepth 1 -print0 | \
-    xargs --null --max-procs 0 --max-args 1 --replace bash -c 'flac2vorbis "{}" "$DSTDIR"'
-}
-
-function check_library_size {
-  SIZE=$(find "$DEVICEPATH/Music" -type f | wc --lines)
-  if (( SIZE > LIBRARYMAX ))
-  then
-    echo "WARNING: Library size exceeds maximum by $(( SIZE - LIBRARYMAX )) files" > /dev/stderr
-  fi
-}
 
 export -f flac2vorbis
 export -f copyflac
@@ -63,4 +33,5 @@ find "$STARTDIR" -name "*.flac" -print0 | \
   uniq --zero-terminated | \
   xargs --null --replace bash -c 'copyflac "{}"'
 
-check_library_size
+# Device can only index up to 2000 files.
+check_library_size 2000
