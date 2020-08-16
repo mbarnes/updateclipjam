@@ -1,0 +1,34 @@
+#!/bin/bash
+#
+# This script syncrhonizes an Android device with an integrated SD card by
+# generating Ogg Vorbis (.ogg) files from local FLAC files and moving them
+# to the device so as to preserve the directory layout of the FLAC files.
+#
+# (c) Copyright 2020 Matthew Barnes <mbarnes@redhat.com>
+#
+
+set -euo pipefail
+
+source $(dirname $(realpath $(which $0)))/functions
+
+export DEVICEPATH="$(realpath $XDG_RUNTIME_DIR/gvfs/mtp* | head --lines=1)/Card"
+
+export -f flac2vorbis
+export -f copyflac
+
+if [ ! -d "$DEVICEPATH" ]
+then
+  >&2 echo "Android device with SD card not mounted."
+  exit 1
+fi
+
+STARTDIR="$HOME/Music"
+if [[ $(pwd) == "$STARTDIR"* ]]
+then
+  STARTDIR=$(pwd)
+fi
+
+find "$STARTDIR" -name "*.flac" -print0 | \
+  xargs --null dirname --zero | \
+  uniq --zero-terminated | \
+  xargs --null --replace bash -c 'copyflac "{}"'
