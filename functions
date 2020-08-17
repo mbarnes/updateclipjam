@@ -10,11 +10,11 @@ function flac2vorbis {
   DSTDIR=$2
   FLACNAME=$(basename "$1")
   VORBISNAME=$(echo ${FLACNAME/%flac/ogg} | sed -e "s|\?||g" -e "s|:| -|g")
-  if [ ! -e "$DSTDIR/$VORBISNAME" ]
+  if ! gio list "$DSTDIR" | grep --quiet "$VORBISNAME"
   then
     ffmpeg -nostats -loglevel quiet -i "$SRCDIR/$FLACNAME" \
            -qscale:a 0 -map 0:a -y "$SRCDIR/$VORBISNAME"
-    mv "$SRCDIR/$VORBISNAME" "$DSTDIR"
+    gio move "$SRCDIR/$VORBISNAME" "$DSTDIR"
     echo "$DSTDIR/$VORBISNAME"
   fi
 }
@@ -23,7 +23,7 @@ function copyflac {
   SRCDIR=$1
   DSTDIR=$(echo "$SRCDIR" | sed -e "s|:| -|g" -e "s|\*||g" -e "s|$HOME|$DEVICEPATH|")
   export DSTDIR
-  mkdir --parents "$DSTDIR"
+  gio mkdir --parent "$DSTDIR" 2> /dev/null
   find "$SRCDIR" -name "*.flac" -maxdepth 1 -print0 | \
     xargs --null --max-procs 0 --max-args 1 --replace bash -c 'flac2vorbis "{}" "$DSTDIR"'
 }

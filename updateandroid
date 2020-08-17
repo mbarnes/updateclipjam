@@ -11,12 +11,13 @@ set -euo pipefail
 
 source $(dirname $(realpath $(which $0)))/functions
 
-export DEVICEPATH="$(realpath $XDG_RUNTIME_DIR/gvfs/mtp* | head --lines=1)/Card"
+export MOUNTURL="$(gio mount --list | grep ^Mount | grep --only-matching 'mtp://.*/')"
+export DEVICEPATH="${MOUNTURL}Card"
 
 export -f flac2vorbis
 export -f copyflac
 
-if [ ! -d "$DEVICEPATH" ]
+if [ ! -n "$MOUNTURL" ]
 then
   >&2 echo "Android device with SD card not mounted."
   exit 1
