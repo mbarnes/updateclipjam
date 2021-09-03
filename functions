@@ -25,7 +25,7 @@ function copyflac {
   export DSTDIR
   gio mkdir --parent "$DSTDIR" 2> /dev/null
   find "$SRCDIR" -name "*.flac" -maxdepth 1 -print0 | \
-    xargs --null --max-procs 0 --max-args 1 --replace bash -c 'flac2vorbis "{}" "$DSTDIR"'
+    xargs --null --max-procs 0 --replace bash -c 'flac2vorbis "{}" "$DSTDIR"'
 }
 
 function check_library_size {
