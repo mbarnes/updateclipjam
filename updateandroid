@@ -12,7 +12,14 @@ set -euo pipefail
 source $(dirname $(realpath $(which $0)))/functions
 
 export MOUNTURL="$(gio mount --list | grep ^Mount | grep --only-matching 'mtp://.*/')"
-export DEVICEPATH="${MOUNTURL}SD card"
+
+# Avoid internal storage if additional storage is available.
+DEVICEPATH=$(gio list --print-uris ${MOUNTURL})
+if [[ $(echo "$DEVICEPATH" | wc --lines) -gt 1 ]]
+then
+  DEVICEPATH=$(echo "$DEVICEPATH" | grep --ignore-case --invert-match Internal | head --lines 1)
+fi
+export DEVICEPATH
 
 export -f flac2vorbis
 export -f copyflac
